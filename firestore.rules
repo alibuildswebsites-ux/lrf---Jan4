@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Properties - Public read, admin-only write
+    match /properties/{propertyId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Users - Users can read/write their own data only
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+      allow read: if isAdmin(); // Admins can read all users
+      allow delete: if isAdmin(); // Only admins can delete users
+    }
+    
+    // Blogs - Public can read published, admins can do everything
+    match /blogs/{blogId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Agents - Public read, admin write
+    match /agents/{agentId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Testimonials - Public read, authenticated users can write
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated();
+    }
+  }
+}
