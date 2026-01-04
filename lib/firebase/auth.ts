@@ -18,11 +18,18 @@ const getErrorMessage = (error: unknown) => {
 };
 
 // Check if a user is an admin
+// Matches firestore.rules: get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
 export const checkIsAdmin = async (email: string | null): Promise<boolean> => {
-  if (!email) return false;
+  if (!auth.currentUser || !email) return false;
   try {
-    const adminDoc = await getDoc(doc(db, 'admins', email));
-    return adminDoc.exists();
+    const userDocRef = doc(db, 'users', auth.currentUser.uid);
+    const userDoc = await getDoc(userDocRef);
+    
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      return data.role === 'admin';
+    }
+    return false;
   } catch (error) {
     console.error("Error checking admin status:", error);
     return false;
@@ -43,6 +50,7 @@ export const signUpWithEmail = async (email: string, password: string, name: str
       uid: user.uid,
       name: name,
       email: email,
+      role: 'user', // Default role
       savedProperties: [],
       createdAt: new Date().toISOString()
     });
@@ -78,6 +86,7 @@ export const signInWithGoogle = async () => {
         uid: user.uid,
         name: user.displayName || 'User',
         email: user.email,
+        role: 'user', // Default role
         savedProperties: [],
         createdAt: new Date().toISOString()
       });

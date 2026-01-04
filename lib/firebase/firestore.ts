@@ -25,6 +25,10 @@ export const uploadFiles = async (files: File[], folderName: string): Promise<st
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
+  if (!cloudName || !uploadPreset) {
+    throw new Error("Cloudinary configuration missing. Please check .env file.");
+  }
+
   const uploadPromises = files.map(async (file) => {
     const formData = new FormData();
     formData.append('file', file);

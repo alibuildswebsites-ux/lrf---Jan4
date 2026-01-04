@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   DollarSign, Home, Search, FileText, ClipboardCheck, Key, Award, 
-  ChevronDown, ChevronUp, Calculator, Phone, Mail, ArrowRight, CheckCircle2
+  ChevronDown, ChevronUp, Calculator, Phone, ArrowRight, CheckCircle2
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';

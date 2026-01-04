@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Property } from '../../types';
-import { X, Upload, Plus, Trash2, Eye, Save, Loader2, Video, Image as ImageIcon } from 'lucide-react';
+import { X, Upload, Plus, Trash2, Eye, Save, Loader2, Video } from 'lucide-react';
 import { addProperty, updateProperty, uploadFiles, setPropertyWithId } from '../../lib/firebase/firestore';
 import { PropertyCard } from '../PropertyCard';
 import { collection, doc } from 'firebase/firestore';
@@ -41,6 +41,7 @@ export const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({ initialDat
   const [uploadingMedia, setUploadingMedia] = useState(false);
   
   // Create a pending ID for new properties to allow uploads before save (used for folder org)
+  // We initialize this once. If initialData exists, we use its ID.
   const [pendingId] = useState(() => initialData?.id || doc(collection(db, 'properties')).id);
 
   useEffect(() => {

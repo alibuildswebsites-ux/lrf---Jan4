@@ -1,8 +1,6 @@
 import { Home, Star, Award, Clock, Key, TrendingUp, PiggyBank, Target, Users, MapPin } from 'lucide-react';
 import { LocationArea, Stat } from './types';
 
-// NOTE: PROPERTIES and TESTIMONIALS have been removed as they are now fetched dynamically from Firestore.
-
 export const LOCATIONS: LocationArea[] = [
   { 
     id: '1', 

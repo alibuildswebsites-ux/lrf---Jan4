@@ -105,11 +105,6 @@ export interface Testimonial {
   updatedAt?: string;
 }
 
-export interface NavLink {
-  label: string;
-  href: string;
-}
-
 export interface UserProfile {
   uid: string;
   name: string;

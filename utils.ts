@@ -1,16 +1,30 @@
 /**
- * Optimizes Unsplash URLs for performance.
- * - Converts to WebP format for smaller file size.
- * - Resizes to exact dimensions needed.
- * - Sets quality to 80% to balance visual fidelity and speed.
+ * Optimizes Image URLs for performance.
+ * - Unsplash: Resizes and converts to WebP.
+ * - Cloudinary: Injects transformations (f_auto, q_auto, width) into the URL.
  */
 export const getOptimizedImageUrl = (url: string, width: number = 800, quality: number = 80): string => {
   if (!url) return '';
+
+  // Handle Unsplash
   if (url.includes('unsplash.com')) {
     // Strip existing params to ensure a clean slate
     const baseUrl = url.split('?')[0];
     return `${baseUrl}?auto=format&fit=crop&q=${quality}&w=${width}&fm=webp`;
   }
+
+  // Handle Cloudinary
+  if (url.includes('cloudinary.com')) {
+    // Check if it already has transformations (avoid double transformation injection)
+    if (url.includes('/upload/f_auto')) return url;
+
+    // Split URL at '/upload/' to inject params
+    const parts = url.split('/upload/');
+    if (parts.length === 2) {
+      return `${parts[0]}/upload/f_auto,q_auto,w_${width},c_limit/${parts[1]}`;
+    }
+  }
+
   return url;
 };
 
