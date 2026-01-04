@@ -80,7 +80,7 @@ export const getProperties = async (status?: string) => {
     }
     
     const snapshot = await getDocs(q);
-    const properties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Property));
+    const properties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any } as Property));
 
     // Ensure consistent sorting by createdAt descending (Newest first)
     return properties.sort((a, b) => {
@@ -98,7 +98,7 @@ export const getPropertyById = async (id: string) => {
   try {
     const docRef = doc(db, 'properties', id);
     const docSnap = await getDoc(docRef);
-    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Property : null;
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() as any } as Property : null;
   } catch (error) {
     console.error('Error fetching property:', error);
     return null;
@@ -197,7 +197,7 @@ export const getBlogs = async (publishedOnly: boolean = true) => {
     }
     
     const snapshot = await getDocs(q);
-    const blogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+    const blogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any } as BlogPost));
 
     // Perform sort in memory
     return blogs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -215,7 +215,7 @@ export const getBlogBySlug = async (slug: string) => {
     
     if (snapshot.empty) return null;
     const doc = snapshot.docs[0];
-    return { id: doc.id, ...doc.data() } as BlogPost;
+    return { id: doc.id, ...doc.data() as any } as BlogPost;
   } catch (error) {
     console.error('Error fetching blog by slug:', error);
     return null;
@@ -281,7 +281,7 @@ export const getAgents = async () => {
     const agentsRef = collection(db, 'agents');
     const q = query(agentsRef, orderBy('order', 'asc'));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Agent));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any } as Agent));
   } catch (error) {
     console.error('Error fetching agents:', error);
     return [];
@@ -292,7 +292,7 @@ export const getAgentById = async (id: string) => {
   try {
     const docRef = doc(db, 'agents', id);
     const docSnap = await getDoc(docRef);
-    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Agent : null;
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() as any } as Agent : null;
   } catch (error) {
     console.error('Error fetching agent:', error);
     return null;
@@ -361,7 +361,7 @@ export const getTestimonials = async () => {
     const testimonialsRef = collection(db, 'testimonials');
     const q = query(testimonialsRef, orderBy('order', 'asc'));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Testimonial));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any } as Testimonial));
   } catch (error) {
     console.error('Error fetching testimonials:', error);
     return [];
@@ -427,7 +427,7 @@ export const getAllUsers = async () => {
     const usersRef = collection(db, 'users');
     const q = query(usersRef, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
+    return snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() as any } as UserProfile));
   } catch (error) {
     console.error('Error fetching users:', error);
     return [];
