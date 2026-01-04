@@ -63,14 +63,6 @@ export interface Agent {
   updatedAt: string;
 }
 
-export interface Service {
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  linkText: string;
-  linkUrl: string;
-}
-
 export interface Stat {
   value: number;
   suffix: string;

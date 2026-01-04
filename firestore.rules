@@ -4,8 +4,10 @@ service cloud.firestore {
     
     // Helper function to check if user is admin
     // Checks the 'role' field on the user's own document
+    // Added 'exists' check to prevent errors during sign-up when doc doesn't exist yet
     function isAdmin() {
       return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
     
@@ -20,12 +22,25 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
     
-    // Users - Users can read/write their own data only
+    // Users - SECURED
     match /users/{userId} {
-      allow read: if isAuthenticated() && request.auth.uid == userId;
-      allow write: if isAuthenticated() && request.auth.uid == userId;
-      allow read: if isAdmin(); // Admins can read all users
-      allow delete: if isAdmin(); // Only admins can delete users
+      // READ: Users can read their own profile. Admins can read all.
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      
+      // CREATE: Users can create their own profile, BUT cannot set 'role' to 'admin'.
+      // Only admins can create profiles with arbitrary roles.
+      allow create: if (isAuthenticated() && request.auth.uid == userId && 
+                       (!('role' in request.resource.data) || request.resource.data.role == 'user'))
+                    || isAdmin();
+
+      // UPDATE: Users can update their own profile, BUT cannot modify the 'role' field.
+      // request.resource.data.role must equal resource.data.role (the existing role).
+      allow update: if (isAuthenticated() && request.auth.uid == userId && 
+                       (!('role' in request.resource.data) || request.resource.data.role == resource.data.role))
+                    || isAdmin();
+      
+      // DELETE: Only admins can delete user profiles.
+      allow delete: if isAdmin();
     }
     
     // Blogs - Public can read published, admins can do everything
