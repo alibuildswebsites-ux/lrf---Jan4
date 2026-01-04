@@ -2,10 +2,11 @@
 export default {
   content: [
     "./index.html",
+    // Only look inside specific folders
     "./components/**/*.{js,ts,jsx,tsx}",
     "./hooks/**/*.{js,ts,jsx,tsx}",
     "./lib/**/*.{js,ts,jsx,tsx}",
-    "./*.{js,ts,jsx,tsx}",
+    "./*.{js,ts,jsx,tsx}", // Keep this, but we will rely on default ignores
   ],
   theme: {
     extend: {
