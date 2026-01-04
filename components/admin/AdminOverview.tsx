@@ -167,7 +167,7 @@ export const AdminOverview = () => {
             <div className="space-y-4">
               {topViewed.map(p => (
                 <div key={p.id} className="flex items-center gap-3">
-                  <img src={p.images[0]} alt="" className="w-12 h-12 rounded-lg object-cover bg-gray-100" />
+                  <img src={p.images[0]} alt={p.title} className="w-12 h-12 rounded-lg object-cover bg-gray-100" />
                   <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-bold text-charcoal truncate">{p.title}</h4>
                     <p className="text-xs text-gray-500 truncate">{p.address}</p>

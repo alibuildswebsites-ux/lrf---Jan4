@@ -95,3 +95,36 @@ export const injectJSONLD = (schema: object) => {
 
   script.textContent = JSON.stringify(schema);
 };
+
+/**
+ * Injects BreadcrumbList JSON-LD into the head.
+ */
+export const injectBreadcrumbJSONLD = (crumbs: { name: string; item: string }[]) => {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": crumbs.map((crumb, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": crumb.name,
+      "item": crumb.item
+    }))
+  };
+  
+  // Use a unique ID for breadcrumbs to avoid conflict with main schema if needed,
+  // or reuse injectJSONLD but manage multiple scripts. For simplicity, reusing injectJSONLD
+  // might overwrite main schema if called sequentially.
+  // Better approach: separate script tag or merge.
+  // Here we use a distinct script for breadcrumbs.
+  
+  let script = document.querySelector('script[type="application/ld+json"][data-breadcrumbs="true"]');
+  
+  if (!script) {
+    script = document.createElement('script');
+    script.setAttribute('type', 'application/ld+json');
+    script.setAttribute('data-breadcrumbs', 'true');
+    document.head.appendChild(script);
+  }
+
+  script.textContent = JSON.stringify(schema);
+};

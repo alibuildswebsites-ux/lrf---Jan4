@@ -115,7 +115,7 @@ export const AdminAgentList: React.FC<AdminAgentListProps> = ({ onEdit, onAddNew
                        <div className="flex items-center gap-4">
                          <div className="w-12 h-12 rounded-full bg-gray-100 overflow-hidden flex-shrink-0">
                            {agent.photo ? (
-                             <img src={agent.photo} alt="" className="w-full h-full object-cover" />
+                             <img src={agent.photo} alt={agent.name} className="w-full h-full object-cover" />
                            ) : (
                              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Img</div>
                            )}

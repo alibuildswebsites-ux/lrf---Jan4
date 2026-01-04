@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Loader2, Send, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import emailjs from '@emailjs/browser';
+import { validateEmail, validatePhone, validateRequired } from '../lib/validation';
+import { CONTACT_DEFAULTS } from '../lib/constants';
 
 interface FormData {
   name: string;
@@ -32,8 +34,8 @@ export const SharedContactForm: React.FC<SharedContactFormProps> = ({ variant = 
     email: '',
     phone: '',
     method: 'Email',
-    interest: 'Buying a Home',
-    location: 'Houston, TX',
+    interest: CONTACT_DEFAULTS.INTEREST,
+    location: CONTACT_DEFAULTS.LOCATION,
     message: '',
     times: [],
     botField: ''
@@ -48,19 +50,10 @@ export const SharedContactForm: React.FC<SharedContactFormProps> = ({ variant = 
   const validate = (data: FormData): FormErrors => {
     const newErrors: FormErrors = {};
     
-    if (!data.name.trim()) newErrors.name = 'Full Name is required';
-    else if (data.name.length < 2) newErrors.name = 'Name must be at least 2 characters';
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!data.email.trim()) newErrors.email = 'Email Address is required';
-    else if (!emailRegex.test(data.email)) newErrors.email = 'Invalid email address';
-
-    const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-    if (!data.phone.trim()) newErrors.phone = 'Phone Number is required';
-    else if (!phoneRegex.test(data.phone)) newErrors.phone = 'Invalid phone format';
-
-    if (!data.message.trim()) newErrors.message = 'Message is required';
-    else if (data.message.length < 10) newErrors.message = 'Message must be at least 10 characters';
+    if (!validateRequired(data.name, 2)) newErrors.name = 'Name must be at least 2 characters';
+    if (!validateEmail(data.email)) newErrors.email = 'Invalid email address';
+    if (!validatePhone(data.phone)) newErrors.phone = 'Invalid phone format';
+    if (!validateRequired(data.message, 10)) newErrors.message = 'Message must be at least 10 characters';
 
     return newErrors;
   };
@@ -113,16 +106,19 @@ export const SharedContactForm: React.FC<SharedContactFormProps> = ({ variant = 
     setIsSubmitting(true);
 
     try {
-      // Prepare template parameters matching the HTML template variables
+      // Prepare template parameters matching standard EmailJS variable conventions.
+      // Ensure your EmailJS template uses these variable names:
+      // {{from_name}}, {{from_email}}, {{phone}}, {{interest}}, {{location}}, {{message}}, {{contact_method}}, {{preferred_times}}
       const templateParams = {
-        name: formData.name,
-        email: formData.email,
+        from_name: formData.name,
+        from_email: formData.email,
+        reply_to: formData.email, // Allows reply directly to sender
         phone: formData.phone,
         interest: formData.interest,
         location: formData.location,
         message: formData.message,
-        method: formData.method,
-        times: formData.times.join(', ') || 'Anytime'
+        contact_method: formData.method,
+        preferred_times: formData.times.join(', ') || 'Anytime'
       };
 
       await emailjs.send(
@@ -134,14 +130,14 @@ export const SharedContactForm: React.FC<SharedContactFormProps> = ({ variant = 
 
       setIsSuccess(true);
       setFormData({
-        name: '', email: '', phone: '', method: 'Email', interest: 'Buying a Home',
-        location: 'Houston, TX', message: '', times: [], botField: ''
+        name: '', email: '', phone: '', method: 'Email', interest: CONTACT_DEFAULTS.INTEREST,
+        location: CONTACT_DEFAULTS.LOCATION, message: '', times: [], botField: ''
       });
       setTouched({});
       setTimeout(() => setIsSuccess(false), 8000);
 
     } catch (error) {
-      console.error('EmailJS Error:', error);
+      if (import.meta.env.DEV) console.error('EmailJS Error:', error);
       setSubmitError('Something went wrong. Please try calling us directly or try again later.');
     } finally {
       setIsSubmitting(false);

@@ -14,10 +14,27 @@ import {
   arrayRemove, 
   addDoc, 
   writeBatch, 
-  increment 
+  increment,
+  DocumentData,
+  QueryDocumentSnapshot
 } from 'firebase/firestore';
 import { db } from '../../firebase.config';
 import { Property, BlogPost, Agent, Testimonial, UserProfile } from '../../types';
+
+// --- Helper for Type Safety ---
+const mapDoc = <T>(doc: QueryDocumentSnapshot<DocumentData>): T => {
+  return {
+    id: doc.id,
+    ...doc.data()
+  } as T;
+};
+
+// --- Logger Helper ---
+const logError = (message: string, error: any) => {
+  if (import.meta.env.DEV) {
+    console.error(message, error);
+  }
+};
 
 // --- File Upload Helper (Cloudinary) ---
 
@@ -58,7 +75,7 @@ export const uploadFiles = async (files: File[], folderName: string): Promise<st
     const uploadedUrls = await Promise.all(uploadPromises);
     return uploadedUrls;
   } catch (error) {
-    console.error("Cloudinary upload error:", error);
+    logError("Cloudinary upload error:", error);
     throw error;
   }
 };
@@ -76,17 +93,11 @@ export const getProperties = async (filters: { status?: string; location?: strin
     }
 
     // Filter by Location/City (Exact match)
-    // NOTE: This assumes filters.location passes a City name (e.g. 'Houston')
     if (filters.location && filters.location !== 'All') {
       constraints.push(where('city', '==', filters.location));
     }
 
-    // SORTING STRATEGY:
-    // If we have filters, we CANNOT easily add orderBy('createdAt', 'desc') without
-    // creating composite indexes for every combination (Status+Date, City+Date, Status+City+Date).
-    // To avoid "Index Required" errors and keep the app low-maintenance, 
-    // we only apply DB sorting if NO filters are active.
-    // Otherwise, we sort the filtered results in memory (Client-side).
+    // Apply DB sorting only if no filters are active to avoid composite index errors
     if (constraints.length === 0) {
       constraints.push(orderBy('createdAt', 'desc'));
     }
@@ -94,21 +105,16 @@ export const getProperties = async (filters: { status?: string; location?: strin
     const q = query(propertiesRef, ...constraints);
     const snapshot = await getDocs(q);
     
-    // Cast and safeguard data
-    const properties = snapshot.docs.map(doc => ({ 
-      id: doc.id, 
-      ...doc.data() as any 
-    } as Property));
+    const properties = snapshot.docs.map(doc => mapDoc<Property>(doc));
 
     // Always sort by Date Descending in memory to ensure consistency
-    // regardless of whether DB sorted it or not.
     return properties.sort((a, b) => {
       const dateA = new Date(a.createdAt || 0).getTime();
       const dateB = new Date(b.createdAt || 0).getTime();
       return dateB - dateA;
     });
   } catch (error) {
-    console.error('Error fetching properties:', error);
+    logError('Error fetching properties:', error);
     return [];
   }
 };
@@ -117,9 +123,9 @@ export const getPropertyById = async (id: string) => {
   try {
     const docRef = doc(db, 'properties', id);
     const docSnap = await getDoc(docRef);
-    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() as any } as Property : null;
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Property : null;
   } catch (error) {
-    console.error('Error fetching property:', error);
+    logError('Error fetching property:', error);
     return null;
   }
 };
@@ -140,12 +146,11 @@ export const addProperty = async (propertyData: Omit<Property, 'id'>) => {
     
     return { success: true, id: newDocRef.id };
   } catch (error: any) {
-    console.error("Error adding property: ", error);
+    logError("Error adding property: ", error);
     return { success: false, error: error.message };
   }
 };
 
-// Explicitly export setDoc wrapper for custom ID usage
 export const setPropertyWithId = async (id: string, propertyData: Omit<Property, 'id'>) => {
   try {
     const now = new Date().toISOString();
@@ -173,7 +178,7 @@ export const updateProperty = async (id: string, propertyData: Partial<Property>
     
     return { success: true };
   } catch (error: any) {
-    console.error("Error updating property: ", error);
+    logError("Error updating property: ", error);
     return { success: false, error: error.message };
   }
 };
@@ -183,7 +188,7 @@ export const deleteProperty = async (id: string) => {
     await deleteDoc(doc(db, 'properties', id));
     return { success: true };
   } catch (error: any) {
-    console.error("Error deleting property: ", error);
+    logError("Error deleting property: ", error);
     return { success: false, error: error.message };
   }
 };
@@ -195,7 +200,7 @@ export const incrementPropertyView = async (id: string) => {
       views: increment(1)
     });
   } catch (error) {
-    console.error("Error incrementing view:", error);
+    logError("Error incrementing view:", error);
   }
 };
 
@@ -206,9 +211,6 @@ export const getBlogs = async (publishedOnly: boolean = true) => {
     const blogsRef = collection(db, 'blogs');
     let q;
     
-    // To fix "The query requires an index" error:
-    // Avoid combining `where` and `orderBy` on different fields in the query
-    // unless a composite index exists. We fetch based on filter, then sort in memory.
     if (publishedOnly) {
       q = query(blogsRef, where('published', '==', true));
     } else {
@@ -216,12 +218,11 @@ export const getBlogs = async (publishedOnly: boolean = true) => {
     }
     
     const snapshot = await getDocs(q);
-    const blogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any } as BlogPost));
+    const blogs = snapshot.docs.map(doc => mapDoc<BlogPost>(doc));
 
-    // Perform sort in memory
     return blogs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
-    console.error('Error fetching blogs:', error);
+    logError('Error fetching blogs:', error);
     return [];
   }
 };
@@ -234,9 +235,9 @@ export const getBlogBySlug = async (slug: string) => {
     
     if (snapshot.empty) return null;
     const doc = snapshot.docs[0];
-    return { id: doc.id, ...doc.data() as any } as BlogPost;
+    return { id: doc.id, ...doc.data() } as BlogPost;
   } catch (error) {
-    console.error('Error fetching blog by slug:', error);
+    logError('Error fetching blog by slug:', error);
     return null;
   }
 };
@@ -261,7 +262,7 @@ export const addBlog = async (blogData: Omit<BlogPost, 'id' | 'createdAt' | 'upd
     
     return { success: true, id: docRef.id };
   } catch (error: any) {
-    console.error("Error adding blog: ", error);
+    logError("Error adding blog: ", error);
     return { success: false, error: error.message };
   }
 };
@@ -278,7 +279,7 @@ export const updateBlog = async (id: string, blogData: Partial<BlogPost>) => {
     
     return { success: true };
   } catch (error: any) {
-    console.error("Error updating blog: ", error);
+    logError("Error updating blog: ", error);
     return { success: false, error: error.message };
   }
 };
@@ -288,7 +289,7 @@ export const deleteBlog = async (id: string) => {
     await deleteDoc(doc(db, 'blogs', id));
     return { success: true };
   } catch (error: any) {
-    console.error("Error deleting blog: ", error);
+    logError("Error deleting blog: ", error);
     return { success: false, error: error.message };
   }
 };
@@ -300,9 +301,9 @@ export const getAgents = async () => {
     const agentsRef = collection(db, 'agents');
     const q = query(agentsRef, orderBy('order', 'asc'));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any } as Agent));
+    return snapshot.docs.map(doc => mapDoc<Agent>(doc));
   } catch (error) {
-    console.error('Error fetching agents:', error);
+    logError('Error fetching agents:', error);
     return [];
   }
 };
@@ -311,9 +312,9 @@ export const getAgentById = async (id: string) => {
   try {
     const docRef = doc(db, 'agents', id);
     const docSnap = await getDoc(docRef);
-    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() as any } as Agent : null;
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Agent : null;
   } catch (error) {
-    console.error('Error fetching agent:', error);
+    logError('Error fetching agent:', error);
     return null;
   }
 };
@@ -334,7 +335,7 @@ export const addAgent = async (agentData: Omit<Agent, 'id' | 'order' | 'createdA
     
     return { success: true, id: docRef.id };
   } catch (error: any) {
-    console.error("Error adding agent: ", error);
+    logError("Error adding agent: ", error);
     return { success: false, error: error.message };
   }
 };
@@ -380,9 +381,9 @@ export const getTestimonials = async () => {
     const testimonialsRef = collection(db, 'testimonials');
     const q = query(testimonialsRef, orderBy('order', 'asc'));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any } as Testimonial));
+    return snapshot.docs.map(doc => mapDoc<Testimonial>(doc));
   } catch (error) {
-    console.error('Error fetching testimonials:', error);
+    logError('Error fetching testimonials:', error);
     return [];
   }
 };
@@ -446,9 +447,9 @@ export const getAllUsers = async () => {
     const usersRef = collection(db, 'users');
     const q = query(usersRef, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() as any } as UserProfile));
+    return snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
   } catch (error) {
-    console.error('Error fetching users:', error);
+    logError('Error fetching users:', error);
     return [];
   }
 };
@@ -502,7 +503,7 @@ export const getSavedProperties = async (userId: string) => {
     
     return properties.filter(p => p !== null) as Property[];
   } catch (error) {
-    console.error('Error fetching saved properties:', error);
+    logError('Error fetching saved properties:', error);
     return [];
   }
 };

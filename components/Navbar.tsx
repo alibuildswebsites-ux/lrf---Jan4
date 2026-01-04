@@ -179,6 +179,8 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
               onMouseLeave={handleMouseLeave}
             >
               <button 
+                aria-expanded={hoverResource}
+                aria-haspopup="true"
                 className={`flex items-center gap-1 text-[15px] font-semibold px-4 py-2 rounded-full transition-all ${
                   hoverResource || resourceLinks.some(r => isActive(r.path)) 
                     ? 'text-charcoal' 
@@ -243,6 +245,8 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  aria-label="User menu"
+                  aria-expanded={isUserMenuOpen}
                   className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-full hover:bg-gray-50 transition-colors border border-gray-100 hover:border-gray-200"
                 >
                   <div className="w-8 h-8 bg-gradient-to-br from-brand to-brand-dark text-white rounded-full flex items-center justify-center font-bold text-sm shadow-sm">
@@ -332,6 +336,7 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
             className="lg:hidden p-2 z-[103] relative rounded-full active:bg-gray-100 text-charcoal hover:bg-gray-50 transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isMobileMenuOpen}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -386,6 +391,7 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
                 >
                   <button 
                     onClick={() => setIsResourcesOpen(!isResourcesOpen)}
+                    aria-expanded={isResourcesOpen}
                     className={`w-full flex items-center justify-between px-4 py-3.5 text-lg font-bold transition-colors ${
                       isResourcesOpen ? 'bg-gray-50 text-charcoal' : 'text-charcoal hover:bg-gray-50'
                     }`}

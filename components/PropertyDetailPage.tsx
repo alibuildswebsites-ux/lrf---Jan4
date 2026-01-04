@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
@@ -10,7 +9,7 @@ import {
   MapPin, Bed, Bath, Maximize, Calendar, Phone, Mail, 
   ChevronLeft, ChevronRight, CheckCircle2, Building, ImageOff
 } from 'lucide-react';
-import { getOptimizedImageUrl, updateSEO, injectJSONLD } from '../utils';
+import { getOptimizedImageUrl, updateSEO, injectJSONLD, injectBreadcrumbJSONLD } from '../utils';
 import { LoadingSpinner } from './common/LoadingSpinner';
 
 export const PropertyDetailPage = () => {
@@ -79,6 +78,13 @@ export const PropertyDetailPage = () => {
               "availability": data.status === 'Pending' ? "https://schema.org/Sold" : "https://schema.org/InStock"
             }
           });
+
+          // Breadcrumbs
+          injectBreadcrumbJSONLD([
+            { name: "Home", item: "https://loftonrealty.com/" },
+            { name: "Properties", item: "https://loftonrealty.com/property-listings" },
+            { name: data.address, item: `https://loftonrealty.com/property-listings/${data.id}` }
+          ]);
         }
       }
       setLoading(false);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getAllUsers, deleteUserAccount, getSavedProperties } from '../../lib/firebase/firestore';
 import { UserProfile, Property } from '../../types';
 import { Search, Loader2, Trash2, Eye, X, Home } from 'lucide-react';
+import { PAGINATION } from '../../lib/constants';
 
 export const AdminClientList = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -14,7 +15,7 @@ export const AdminClientList = () => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 50;
+  const itemsPerPage = PAGINATION.ADMIN_LIST_ITEMS;
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -181,7 +182,7 @@ export const AdminClientList = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {userProperties.map(p => (
                       <div key={p.id} className="flex gap-3 p-3 border border-gray-100 rounded-xl hover:border-brand/30 transition-colors">
-                        <img src={p.images[0]} alt="" className="w-16 h-16 rounded-lg object-cover bg-gray-100" />
+                        <img src={p.images[0]} alt={p.title} className="w-16 h-16 rounded-lg object-cover bg-gray-100" />
                         <div className="min-w-0">
                           <h5 className="font-bold text-sm truncate">{p.title}</h5>
                           <p className="text-xs text-gray-500 truncate">{p.address}</p>

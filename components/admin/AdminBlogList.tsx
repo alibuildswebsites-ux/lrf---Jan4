@@ -98,7 +98,7 @@ export const AdminBlogList: React.FC<AdminBlogListProps> = ({ onEdit, onAddNew }
                        <div className="flex items-center gap-4">
                          <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
                            {blog.featuredImage ? (
-                             <img src={blog.featuredImage} alt="" className="w-full h-full object-cover" />
+                             <img src={blog.featuredImage} alt={blog.title} className="w-full h-full object-cover" />
                            ) : (
                              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Img</div>
                            )}

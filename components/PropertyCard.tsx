@@ -22,23 +22,30 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
 
   // Check if property is saved on mount
   useEffect(() => {
+    let isMounted = true;
+
     const checkFavoriteStatus = async () => {
       if (user) {
         try {
           const userDocRef = doc(db, 'users', user.uid);
           const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
+          if (isMounted && userDoc.exists()) {
             const savedProps = userDoc.data().savedProperties || [];
             setIsFavorite(savedProps.includes(property.id));
           }
         } catch (error) {
-          console.error("Error checking favorite status:", error);
+          if (isMounted) console.error("Error checking favorite status:", error);
         }
       } else {
-        setIsFavorite(false);
+        if (isMounted) setIsFavorite(false);
       }
     };
+
     checkFavoriteStatus();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user, property.id]);
 
   const hasImages = property.images && property.images.length > 0;

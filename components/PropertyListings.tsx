@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { updateSEO } from '../utils';
 import { LoadingSpinner } from './common/LoadingSpinner';
+import { PAGINATION } from '../lib/constants';
 
 // --- Types ---
 
@@ -30,7 +31,7 @@ export const PropertyListings = () => {
   const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc' | 'sqft-desc'>('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-  const itemsPerPage = 6;
+  const itemsPerPage = PAGINATION.GRID_ITEMS;
   
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -78,6 +79,8 @@ export const PropertyListings = () => {
 
   // Fetch properties when SERVER-supported filters change (Location, Status)
   useEffect(() => {
+    let isMounted = true;
+
     const fetchProps = async () => {
       setLoading(true);
       // Ask the database for specific results to optimize performance
@@ -85,10 +88,18 @@ export const PropertyListings = () => {
         status: filters.status,
         location: filters.location
       });
-      setAllProperties(data as Property[]);
-      setLoading(false);
+      
+      if (isMounted) {
+        setAllProperties(data as Property[]);
+        setLoading(false);
+      }
     };
+
     fetchProps();
+
+    return () => {
+      isMounted = false;
+    };
   }, [filters.status, filters.location]);
 
   // Sync state changes to URL

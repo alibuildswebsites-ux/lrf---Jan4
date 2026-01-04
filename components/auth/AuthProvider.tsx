@@ -22,26 +22,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      
-      if (currentUser) {
-        // Check admin status immediately and cache it in state
-        try {
+      try {
+        setUser(currentUser);
+        
+        if (currentUser) {
+          // Check admin status immediately and cache it in state
           const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
           if (userDoc.exists() && userDoc.data().role === 'admin') {
             setIsAdmin(true);
           } else {
             setIsAdmin(false);
           }
-        } catch (error) {
-          console.error("Error fetching user role:", error);
+        } else {
           setIsAdmin(false);
         }
-      } else {
+      } catch (error) {
+        console.error("Auth state error:", error);
         setIsAdmin(false);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
     return () => unsubscribe();

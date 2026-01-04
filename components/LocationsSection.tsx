@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { LOCATIONS } from '../data';
 import { LocationArea } from '../types';
-import { MapPin, TrendingUp, ArrowRight, X, Building } from 'lucide-react';
+import { MapPin, TrendingUp, ArrowRight, X, Building, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getOptimizedImageUrl } from '../utils';
@@ -10,6 +10,7 @@ import { SectionHeader } from './common/SectionHeader';
 
 export const LocationsSection = () => {
   const [selectedLocation, setSelectedLocation] = useState<LocationArea | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const navigate = useNavigate();
 
   // Close modal on escape key
@@ -20,6 +21,13 @@ export const LocationsSection = () => {
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
+
+  // Reset image loaded state when location changes
+  useEffect(() => {
+    if (selectedLocation) {
+        setImageLoaded(false);
+    }
+  }, [selectedLocation]);
 
   const handleNavigateToProperties = (locationName: string) => {
     // Navigate to properties page with location filter
@@ -108,21 +116,27 @@ export const LocationsSection = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="relative h-48 md:h-64 flex-shrink-0 bg-gray-100">
+                {!imageLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-200 z-10">
+                        <Loader2 className="animate-spin text-gray-400" />
+                    </div>
+                )}
                 <img 
                   src={getOptimizedImageUrl(selectedLocation.image, 800)} 
                   alt={`${selectedLocation.name} real estate landscape`} 
-                  className="w-full h-full object-cover"
+                  className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                   loading="eager"
+                  onLoad={() => setImageLoaded(true)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <button 
                   onClick={() => setSelectedLocation(null)}
-                  className="absolute top-4 right-4 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-white z-10"
+                  className="absolute top-4 right-4 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-white z-20"
                   aria-label="Close modal"
                 >
                   <X size={20} />
                 </button>
-                <div className="absolute bottom-6 left-6 md:left-8 text-white">
+                <div className="absolute bottom-6 left-6 md:left-8 text-white z-10">
                   <h3 id="modal-title" className="text-2xl md:text-4xl font-extrabold tracking-tight mb-2">
                     {selectedLocation.name}
                   </h3>
