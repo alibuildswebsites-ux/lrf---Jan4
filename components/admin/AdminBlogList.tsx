@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getBlogs, deleteBlog } from '../../lib/firebase/firestore';
 import { BlogPost } from '../../types';
-import { Plus, Edit2, Trash2, Search, Loader2, Eye } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Loader2, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface AdminBlogListProps {
@@ -130,7 +130,7 @@ export const AdminBlogList: React.FC<AdminBlogListProps> = ({ onEdit, onAddNew }
                            onClick={() => onEdit(blog)}
                            className="p-2 text-gray-400 hover:text-brand hover:bg-brand-light rounded-lg transition-all"
                          >
-                           <Edit2 size={18} />
+                           <Pencil size={18} />
                          </button>
                          <button 
                            onClick={() => handleDelete(blog.id)}

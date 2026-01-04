@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { getProperties, deleteProperty } from '../../lib/firebase/firestore';
 import { Property, BlogPost, Agent } from '../../types';
-import { Plus, Edit2, Trash2, Search, LayoutGrid, FileText, Users, BarChart3, MessageSquare } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, LayoutGrid, FileText, Users, BarChart3, MessageSquare } from 'lucide-react';
 import { AdminPropertyForm } from './AdminPropertyForm';
 import { AdminBlogList } from './AdminBlogList';
 import { AdminBlogForm } from './AdminBlogForm';
@@ -173,7 +172,7 @@ export const AdminDashboard = () => {
                         <td className="px-6 py-4 font-bold">${p.price.toLocaleString()}</td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex justify-end gap-2">
-                            <button onClick={() => handleEditProp(p)} className="p-2 text-gray-400 hover:text-brand"><Edit2 size={18}/></button>
+                            <button onClick={() => handleEditProp(p)} className="p-2 text-gray-400 hover:text-brand"><Pencil size={18}/></button>
                             <button onClick={() => handleDeleteProp(p.id)} className="p-2 text-gray-400 hover:text-red-500"><Trash2 size={18}/></button>
                           </div>
                         </td>

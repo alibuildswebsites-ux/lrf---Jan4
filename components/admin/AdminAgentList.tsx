@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAgents, deleteAgent, updateAgentOrder } from '../../lib/firebase/firestore';
 import { Agent } from '../../types';
-import { Plus, Edit2, Trash2, Loader2, GripVertical, Save } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, GripVertical, Save } from 'lucide-react';
 import { Reorder } from 'framer-motion';
 
 interface AdminAgentListProps {
@@ -139,7 +139,7 @@ export const AdminAgentList: React.FC<AdminAgentListProps> = ({ onEdit, onAddNew
                            onClick={() => onEdit(agent)}
                            className="p-2 text-gray-400 hover:text-brand hover:bg-brand-light rounded-lg transition-all"
                          >
-                           <Edit2 size={18} />
+                           <Pencil size={18} />
                          </button>
                          <button 
                            onClick={() => handleDelete(agent.id, agent.name)}
