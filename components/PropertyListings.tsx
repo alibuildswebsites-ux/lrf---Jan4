@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
@@ -53,10 +52,17 @@ export const PropertyListings = () => {
     };
   });
 
-  // Extract unique locations and types for dropdowns
+  // Extract unique locations for dropdown - note: this list updates based on fetched properties
+  // For a more robust app, you might want to hardcode or fetch distinct cities separately
   const availableLocations = useMemo(() => {
     return Array.from(new Set(allProperties.map(p => p.city))).sort();
   }, [allProperties]);
+
+  // If specific filters are applied on the server, we might miss some cities in the dropdown.
+  // Ideally, you'd fetch a list of 'cities' from a separate collection or config.
+  // For now, we will add common cities to ensure they appear if no data is loaded yet.
+  const commonCities = ['Houston', 'Galveston', 'Austin', 'Katy', 'Pearland', 'Sugar Land'].filter(c => !availableLocations.includes(c));
+  const displayLocations = [...availableLocations, ...commonCities].sort();
 
   const availableTypes = ['House', 'Condo', 'Apartment', 'Townhouse', 'Land', 'Other'];
 
@@ -68,16 +74,22 @@ export const PropertyListings = () => {
       description: "Browse exclusive real estate listings in Houston, Galveston, Austin, and the Gulf Coast. Find your dream home with Lofton Realty.",
       url: "https://loftonrealty.com/properties"
     });
-    
-    // Fetch Properties
+  }, []);
+
+  // Fetch properties when SERVER-supported filters change (Location, Status)
+  useEffect(() => {
     const fetchProps = async () => {
       setLoading(true);
-      const data = await getProperties();
+      // Ask the database for specific results to optimize performance
+      const data = await getProperties({
+        status: filters.status,
+        location: filters.location
+      });
       setAllProperties(data as Property[]);
       setLoading(false);
     };
     fetchProps();
-  }, []);
+  }, [filters.status, filters.location]);
 
   // Sync state changes to URL
   useEffect(() => {
@@ -90,16 +102,12 @@ export const PropertyListings = () => {
     setSearchParams(params, { replace: true });
   }, [filters, setSearchParams]);
 
-  // --- Filter Logic ---
+  // --- Client-Side Filter Logic ---
+  // We still filter by Price, Beds, Baths, and Types on the client
+  // because Firestore inequality filters restricts sorting and flexibility.
 
   const filteredProperties = useMemo(() => {
     return allProperties.filter(property => {
-      // Status
-      if (filters.status !== 'All' && property.status !== filters.status) return false;
-
-      // Location (City)
-      if (filters.location && property.city !== filters.location) return false;
-      
       // Type Match (Array check)
       if (filters.types.length > 0 && !filters.types.includes(property.type)) return false;
       
@@ -128,8 +136,8 @@ export const PropertyListings = () => {
         return sorted.sort((a, b) => b.sqft - a.sqft);
       case 'newest':
       default:
-        // Sort by id or createdAt if available
-        return sorted; // Firestore default is mostly time based if IDs are sequential or query is sorted
+        // Already sorted by createdAt descending from getProperties
+        return sorted; 
     }
   }, [filteredProperties, sortBy]);
 
@@ -235,7 +243,7 @@ export const PropertyListings = () => {
             className="w-full appearance-none bg-white border border-gray-200 rounded-lg px-4 py-3 pr-10 outline-none focus:ring-2 focus:ring-brand focus:border-transparent text-gray-700 font-medium"
           >
             <option value="">Any City</option>
-            {availableLocations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+            {displayLocations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
         </div>

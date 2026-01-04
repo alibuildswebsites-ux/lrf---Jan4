@@ -65,24 +65,43 @@ export const uploadFiles = async (files: File[], folderName: string): Promise<st
 
 // --- Properties CRUD ---
 
-export const getProperties = async (status?: string) => {
+export const getProperties = async (filters: { status?: string; location?: string } = {}) => {
   try {
     const propertiesRef = collection(db, 'properties');
-    let q;
-    
-    // To avoid "Index required" errors for composite queries (where + orderBy),
-    // we filter in DB and sort in memory if a filter is active.
-    if (status && status !== 'All') {
-      q = query(propertiesRef, where('status', '==', status));
-    } else {
-      // Single field sort does not require a composite index
-      q = query(propertiesRef, orderBy('createdAt', 'desc'));
-    }
-    
-    const snapshot = await getDocs(q);
-    const properties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any } as Property));
+    const constraints = [];
 
-    // Ensure consistent sorting by createdAt descending (Newest first)
+    // Filter by Status (Exact match)
+    if (filters.status && filters.status !== 'All') {
+      constraints.push(where('status', '==', filters.status));
+    }
+
+    // Filter by Location/City (Exact match)
+    // NOTE: This assumes filters.location passes a City name (e.g. 'Houston')
+    if (filters.location && filters.location !== 'All') {
+      constraints.push(where('city', '==', filters.location));
+    }
+
+    // SORTING STRATEGY:
+    // If we have filters, we CANNOT easily add orderBy('createdAt', 'desc') without
+    // creating composite indexes for every combination (Status+Date, City+Date, Status+City+Date).
+    // To avoid "Index Required" errors and keep the app low-maintenance, 
+    // we only apply DB sorting if NO filters are active.
+    // Otherwise, we sort the filtered results in memory (Client-side).
+    if (constraints.length === 0) {
+      constraints.push(orderBy('createdAt', 'desc'));
+    }
+
+    const q = query(propertiesRef, ...constraints);
+    const snapshot = await getDocs(q);
+    
+    // Cast and safeguard data
+    const properties = snapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data() as any 
+    } as Property));
+
+    // Always sort by Date Descending in memory to ensure consistency
+    // regardless of whether DB sorted it or not.
     return properties.sort((a, b) => {
       const dateA = new Date(a.createdAt || 0).getTime();
       const dateB = new Date(b.createdAt || 0).getTime();

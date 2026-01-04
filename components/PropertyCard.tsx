@@ -41,9 +41,12 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
     checkFavoriteStatus();
   }, [user, property.id]);
 
+  const hasImages = property.images && property.images.length > 0;
+
   const handlePrevImage = (e: MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    if (!hasImages) return;
     setCurrentImageIndex((prev) => 
       prev === 0 ? property.images.length - 1 : prev - 1
     );
@@ -53,6 +56,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
   const handleNextImage = (e: MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    if (!hasImages) return;
     setCurrentImageIndex((prev) => 
       prev === property.images.length - 1 ? 0 : prev + 1
     );
@@ -104,7 +108,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
       <div className={`relative overflow-hidden bg-gray-100 ${isList ? 'w-full md:w-[320px] h-[240px] md:h-auto shrink-0' : 'h-[240px] lg:h-[260px] w-full'}`}>
          
          {/* Images */}
-         {!imageError && property.images.length > 0 ? (
+         {!imageError && hasImages ? (
            property.images.map((img, idx) => (
              <div 
                key={idx}
@@ -142,7 +146,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
          </div>
 
          {/* Carousel Controls */}
-         {property.images.length > 1 && !imageError && (
+         {hasImages && property.images.length > 1 && !imageError && (
            <>
              <button 
                onClick={handlePrevImage}
