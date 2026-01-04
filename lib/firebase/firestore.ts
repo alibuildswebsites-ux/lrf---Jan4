@@ -22,9 +22,8 @@ import { Property, BlogPost, Agent, Testimonial, UserProfile } from '../../types
 // --- File Upload Helper (Cloudinary) ---
 
 export const uploadFiles = async (files: File[], folderName: string): Promise<string[]> => {
-  // Hardcoded credentials as requested
-  const cloudName = 'dgqufb8sj';
-  const uploadPreset = 'lofton_unsigned';
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   const uploadPromises = files.map(async (file) => {
     const formData = new FormData();

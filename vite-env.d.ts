@@ -13,6 +13,11 @@ interface ImportMetaEnv {
   readonly VITE_CLOUDINARY_CLOUD_NAME: string
   readonly VITE_CLOUDINARY_UPLOAD_PRESET: string
   
+  // EmailJS Configuration
+  readonly VITE_EMAILJS_SERVICE_ID: string
+  readonly VITE_EMAILJS_TEMPLATE_ID: string
+  readonly VITE_EMAILJS_PUBLIC_KEY: string
+  
   // API Configuration
   readonly VITE_API_BASE_URL: string
   
