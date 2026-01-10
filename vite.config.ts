@@ -15,10 +15,10 @@ export default defineConfig({
     }
   },
   css: {
-    devSourcemap: false, // ❌ DISABLES CSS SOURCE MAPS (Huge RAM saver)
+    devSourcemap: true, // ✅ ENABLED CSS SOURCE MAPS
   },
   build: {
-    sourcemap: false, // ❌ DISABLES JS SOURCE MAPS
+    sourcemap: true, // ✅ ENABLED JS SOURCE MAPS
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {

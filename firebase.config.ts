@@ -16,12 +16,8 @@ const missingVars = requiredEnvVars.filter(key => !import.meta.env[key]);
 
 if (missingVars.length > 0) {
   const errorMessage = `Missing required Firebase configuration environment variables: ${missingVars.join(', ')}. Please check your .env file.`;
-  console.error(errorMessage);
-  // In development, throw to stop execution and alert dev. 
-  // In prod, this will likely cause a crash anyway, but the error is clearer.
-  if (import.meta.env.DEV) {
-    throw new Error(errorMessage);
-  }
+  // Changed from throwing Error to console.warn to prevent app crash (White Screen) on load
+  console.warn(errorMessage);
 }
 
 const firebaseConfig = {
