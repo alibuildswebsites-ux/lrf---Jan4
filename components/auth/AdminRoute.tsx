@@ -1,7 +1,8 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { Loader2, ShieldAlert } from 'lucide-react';
+import { logOut } from '../../lib/firebase/auth';
+import { Loader2, ShieldAlert, LogOut } from 'lucide-react';
 
 interface AdminRouteProps {
   children: React.ReactNode;
@@ -9,6 +10,11 @@ interface AdminRouteProps {
 
 export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const { user, isAdmin, loading } = useAuth();
+
+  const handleLogout = async () => {
+    await logOut();
+    window.location.href = '/login';
+  };
 
   if (loading) {
     return (
@@ -35,12 +41,20 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
         <p className="text-gray-500 max-w-md mb-8">
           You do not have administrative privileges to view this page.
         </p>
-        <button 
-          onClick={() => window.location.href = '/dashboard'}
-          className="bg-charcoal text-white px-6 py-3 rounded-xl font-bold hover:bg-black transition-colors"
-        >
-          Return to Dashboard
-        </button>
+        <div className="flex gap-4">
+          <button 
+            onClick={() => window.location.href = '/dashboard'}
+            className="bg-charcoal text-white px-6 py-3 rounded-xl font-bold hover:bg-black transition-colors"
+          >
+            Return to Dashboard
+          </button>
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 transition-colors"
+          >
+            <LogOut size={18} /> Sign Out
+          </button>
+        </div>
       </div>
     );
   }

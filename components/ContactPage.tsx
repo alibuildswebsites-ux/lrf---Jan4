@@ -11,6 +11,7 @@ import { Footer } from './Footer';
 import { STATS } from '../data';
 import { getOptimizedImageUrl, updateSEO } from '../utils';
 import { SharedContactForm } from './SharedContactForm';
+import { COMPANY_INFO } from '../lib/constants';
 
 export const ContactPage = () => {
   const navigate = useNavigate();
@@ -58,12 +59,12 @@ export const ContactPage = () => {
         <div className="grid md:grid-cols-3 gap-6">
           {[
             { 
-              icon: Phone, title: 'Call Us', detail: '713-203-7661', sub: '24/7 Availability', 
-              action: 'Call Now', href: 'tel:7132037661' 
+              icon: Phone, title: 'Call Us', detail: COMPANY_INFO.PHONE, sub: '24/7 Availability', 
+              action: 'Call Now', href: `tel:${COMPANY_INFO.PHONE_RAW}` 
             },
             { 
-              icon: Mail, title: 'Email Us', detail: 'Info@LoftonRealty.com', sub: 'Response within 1 hour', 
-              action: 'Send Email', href: 'mailto:Info@LoftonRealty.com' 
+              icon: Mail, title: 'Email Us', detail: COMPANY_INFO.EMAIL, sub: 'Response within 1 hour', 
+              action: 'Send Email', href: `mailto:${COMPANY_INFO.EMAIL}` 
             },
             { 
               icon: MapPin, title: 'Visit Our Office', detail: 'Houston, Texas Area', sub: 'By appointment', 
@@ -137,8 +138,8 @@ export const ContactPage = () => {
                   Real Estate Broker with 19+ years experience. MBA in Finance. Former Financial Planner. Philosophy: Clients come first.
                 </p>
                 <div className="flex gap-3">
-                  <a href="#" className="p-2 text-gray-400 hover:text-blue-600 transition-colors bg-gray-50 rounded-lg"><Linkedin size={18} /></a>
-                  <a href="mailto:Info@LoftonRealty.com" className="p-2 text-gray-400 hover:text-brand transition-colors bg-gray-50 rounded-lg"><Mail size={18} /></a>
+                  <a href={COMPANY_INFO.SOCIAL.LINKEDIN} className="p-2 text-gray-400 hover:text-blue-600 transition-colors bg-gray-50 rounded-lg"><Linkedin size={18} /></a>
+                  <a href={`mailto:${COMPANY_INFO.EMAIL}`} className="p-2 text-gray-400 hover:text-brand transition-colors bg-gray-50 rounded-lg"><Mail size={18} /></a>
                 </div>
               </div>
 

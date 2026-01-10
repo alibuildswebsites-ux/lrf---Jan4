@@ -14,3 +14,17 @@ export const CONTACT_DEFAULTS = {
   LOCATION: 'Houston, TX',
   INTEREST: 'Buying a Home',
 };
+
+export const COMPANY_INFO = {
+  NAME: 'Lofton Realty',
+  PHONE: '(713) 203-7661',
+  PHONE_RAW: '7132037661', // For tel: links
+  EMAIL: 'Info@LoftonRealty.com',
+  ADDRESS: 'Houston, TX',
+  FOUNDED_YEAR: 2006,
+  SOCIAL: {
+    FACEBOOK: 'https://facebook.com/loftonrealty',
+    INSTAGRAM: 'https://instagram.com/loftonrealty',
+    LINKEDIN: 'https://linkedin.com/company/lofton-realty',
+  }
+};
