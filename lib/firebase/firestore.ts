@@ -83,6 +83,7 @@ export const uploadFiles = async (files: File[], folderName: string): Promise<st
 // --- Properties CRUD ---
 
 export const getProperties = async (filters: { status?: string; location?: string } = {}) => {
+  if (!db) return [];
   try {
     const propertiesRef = collection(db, 'properties');
     const constraints = [];
@@ -120,6 +121,7 @@ export const getProperties = async (filters: { status?: string; location?: strin
 };
 
 export const getPropertyById = async (id: string) => {
+  if (!db) return null;
   try {
     const docRef = doc(db, 'properties', id);
     const docSnap = await getDoc(docRef);
@@ -131,6 +133,7 @@ export const getPropertyById = async (id: string) => {
 };
 
 export const addProperty = async (propertyData: Omit<Property, 'id'>) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     // Generate a new ID first to create a folder for images
     const newDocRef = doc(collection(db, 'properties'));
@@ -152,6 +155,7 @@ export const addProperty = async (propertyData: Omit<Property, 'id'>) => {
 };
 
 export const setPropertyWithId = async (id: string, propertyData: Omit<Property, 'id'>) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const now = new Date().toISOString();
     await setDoc(doc(db, 'properties', id), {
@@ -167,6 +171,7 @@ export const setPropertyWithId = async (id: string, propertyData: Omit<Property,
 };
 
 export const updateProperty = async (id: string, propertyData: Partial<Property>) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const docRef = doc(db, 'properties', id);
     const now = new Date().toISOString();
@@ -184,6 +189,7 @@ export const updateProperty = async (id: string, propertyData: Partial<Property>
 };
 
 export const deleteProperty = async (id: string) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     await deleteDoc(doc(db, 'properties', id));
     return { success: true };
@@ -194,6 +200,7 @@ export const deleteProperty = async (id: string) => {
 };
 
 export const incrementPropertyView = async (id: string) => {
+  if (!db) return;
   try {
     const docRef = doc(db, 'properties', id);
     await updateDoc(docRef, {
@@ -207,6 +214,7 @@ export const incrementPropertyView = async (id: string) => {
 // --- Blog CRUD ---
 
 export const getBlogs = async (publishedOnly: boolean = true) => {
+  if (!db) return [];
   try {
     const blogsRef = collection(db, 'blogs');
     let q;
@@ -228,6 +236,7 @@ export const getBlogs = async (publishedOnly: boolean = true) => {
 };
 
 export const getBlogBySlug = async (slug: string) => {
+  if (!db) return null;
   try {
     const blogsRef = collection(db, 'blogs');
     const q = query(blogsRef, where('slug', '==', slug), limit(1));
@@ -243,6 +252,7 @@ export const getBlogBySlug = async (slug: string) => {
 };
 
 export const addBlog = async (blogData: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt'>) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const blogsRef = collection(db, 'blogs');
     const now = new Date().toISOString();
@@ -268,6 +278,7 @@ export const addBlog = async (blogData: Omit<BlogPost, 'id' | 'createdAt' | 'upd
 };
 
 export const updateBlog = async (id: string, blogData: Partial<BlogPost>) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const docRef = doc(db, 'blogs', id);
     const now = new Date().toISOString();
@@ -285,6 +296,7 @@ export const updateBlog = async (id: string, blogData: Partial<BlogPost>) => {
 };
 
 export const deleteBlog = async (id: string) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     await deleteDoc(doc(db, 'blogs', id));
     return { success: true };
@@ -297,6 +309,7 @@ export const deleteBlog = async (id: string) => {
 // --- Agent CRUD ---
 
 export const getAgents = async () => {
+  if (!db) return [];
   try {
     const agentsRef = collection(db, 'agents');
     const q = query(agentsRef, orderBy('order', 'asc'));
@@ -309,6 +322,7 @@ export const getAgents = async () => {
 };
 
 export const getAgentById = async (id: string) => {
+  if (!db) return null;
   try {
     const docRef = doc(db, 'agents', id);
     const docSnap = await getDoc(docRef);
@@ -320,6 +334,7 @@ export const getAgentById = async (id: string) => {
 };
 
 export const addAgent = async (agentData: Omit<Agent, 'id' | 'order' | 'createdAt' | 'updatedAt'>) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const agentsRef = collection(db, 'agents');
     const now = new Date().toISOString();
@@ -341,6 +356,7 @@ export const addAgent = async (agentData: Omit<Agent, 'id' | 'order' | 'createdA
 };
 
 export const updateAgent = async (id: string, agentData: Partial<Agent>) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const docRef = doc(db, 'agents', id);
     const now = new Date().toISOString();
@@ -352,6 +368,7 @@ export const updateAgent = async (id: string, agentData: Partial<Agent>) => {
 };
 
 export const deleteAgent = async (id: string) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     await deleteDoc(doc(db, 'agents', id));
     return { success: true };
@@ -361,6 +378,7 @@ export const deleteAgent = async (id: string) => {
 };
 
 export const updateAgentOrder = async (agents: Agent[]) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const batch = writeBatch(db);
     agents.forEach((agent, index) => {
@@ -377,6 +395,7 @@ export const updateAgentOrder = async (agents: Agent[]) => {
 // --- Testimonials CRUD ---
 
 export const getTestimonials = async () => {
+  if (!db) return [];
   try {
     const testimonialsRef = collection(db, 'testimonials');
     const q = query(testimonialsRef, orderBy('order', 'asc'));
@@ -389,6 +408,7 @@ export const getTestimonials = async () => {
 };
 
 export const addTestimonial = async (data: Omit<Testimonial, 'id' | 'order'>) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const ref = collection(db, 'testimonials');
     const now = new Date().toISOString();
@@ -408,6 +428,7 @@ export const addTestimonial = async (data: Omit<Testimonial, 'id' | 'order'>) =>
 };
 
 export const updateTestimonial = async (id: string, data: Partial<Testimonial>) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const docRef = doc(db, 'testimonials', id);
     await updateDoc(docRef, { ...data, updatedAt: new Date().toISOString() });
@@ -418,6 +439,7 @@ export const updateTestimonial = async (id: string, data: Partial<Testimonial>) 
 };
 
 export const deleteTestimonial = async (id: string) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     await deleteDoc(doc(db, 'testimonials', id));
     return { success: true };
@@ -427,6 +449,7 @@ export const deleteTestimonial = async (id: string) => {
 };
 
 export const updateTestimonialOrder = async (testimonials: Testimonial[]) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const batch = writeBatch(db);
     testimonials.forEach((item, index) => {
@@ -443,6 +466,7 @@ export const updateTestimonialOrder = async (testimonials: Testimonial[]) => {
 // --- Client Management ---
 
 export const getAllUsers = async () => {
+  if (!db) return [];
   try {
     const usersRef = collection(db, 'users');
     const q = query(usersRef, orderBy('createdAt', 'desc'));
@@ -455,6 +479,7 @@ export const getAllUsers = async () => {
 };
 
 export const deleteUserAccount = async (uid: string) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     await deleteDoc(doc(db, 'users', uid));
     return { success: true };
@@ -466,6 +491,7 @@ export const deleteUserAccount = async (uid: string) => {
 // --- User Saved Properties ---
 
 export const saveProperty = async (userId: string, propertyId: string) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, {
@@ -478,6 +504,7 @@ export const saveProperty = async (userId: string, propertyId: string) => {
 };
 
 export const unsaveProperty = async (userId: string, propertyId: string) => {
+  if (!db) return { success: false, error: "Database connection failed" };
   try {
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, {
@@ -490,6 +517,7 @@ export const unsaveProperty = async (userId: string, propertyId: string) => {
 };
 
 export const getSavedProperties = async (userId: string) => {
+  if (!db) return [];
   try {
     const userDoc = await getDoc(doc(db, 'users', userId));
     if (!userDoc.exists()) return [];

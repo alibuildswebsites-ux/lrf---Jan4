@@ -18,9 +18,8 @@ const getErrorMessage = (error: unknown) => {
 };
 
 // Check if a user is an admin
-// Matches firestore.rules: get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
 export const checkIsAdmin = async (email: string | null): Promise<boolean> => {
-  if (!auth.currentUser || !email) return false;
+  if (!auth || !auth.currentUser || !email || !db) return false;
   try {
     const userDocRef = doc(db, 'users', auth.currentUser.uid);
     const userDoc = await getDoc(userDocRef);
@@ -38,6 +37,7 @@ export const checkIsAdmin = async (email: string | null): Promise<boolean> => {
 
 // Sign up with email and password
 export const signUpWithEmail = async (email: string, password: string, name: string) => {
+  if (!auth || !db) return { success: false, error: "Authentication service not initialized. Please check configuration." };
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
@@ -63,6 +63,7 @@ export const signUpWithEmail = async (email: string, password: string, name: str
 
 // Sign in with email and password
 export const signInWithEmail = async (email: string, password: string) => {
+  if (!auth) return { success: false, error: "Authentication service not initialized." };
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return { success: true, user: userCredential.user };
@@ -73,6 +74,7 @@ export const signInWithEmail = async (email: string, password: string) => {
 
 // Sign in with Google
 export const signInWithGoogle = async () => {
+  if (!auth || !db || !googleProvider) return { success: false, error: "Authentication service not initialized." };
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
@@ -100,6 +102,7 @@ export const signInWithGoogle = async () => {
 
 // Sign out
 export const logOut = async () => {
+  if (!auth) return { success: false, error: "Not initialized" };
   try {
     await signOut(auth);
     return { success: true };
@@ -110,6 +113,7 @@ export const logOut = async () => {
 
 // Send password reset email
 export const resetPassword = async (email: string) => {
+  if (!auth) return { success: false, error: "Not initialized" };
   try {
     await sendPasswordResetEmail(auth, email);
     return { success: true };
@@ -120,6 +124,7 @@ export const resetPassword = async (email: string) => {
 
 // Update user profile name
 export const updateUserName = async (user: User, newName: string) => {
+  if (!db) return { success: false, error: "Database not connected" };
   try {
     await updateProfile(user, { displayName: newName });
     await setDoc(doc(db, 'users', user.uid), { name: newName }, { merge: true });
