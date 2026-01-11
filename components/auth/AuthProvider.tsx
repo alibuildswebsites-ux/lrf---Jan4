@@ -21,6 +21,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // CRITICAL FIX: If auth is null (due to missing env vars in firebase.config.ts),
+    // skip authentication logic to prevent app crash.
+    if (!auth) {
+      console.warn("Auth service not initialized. Skipping auth check.");
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       try {
         setUser(currentUser);
